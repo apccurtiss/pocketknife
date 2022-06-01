@@ -1,2 +1,5 @@
-# pocketknife
-A helpful set of programs / configurations that I use often.
+# Pocketknife
+A set of useful tools and libraries.
+
+# Usage
+`$ bash setup.sh`

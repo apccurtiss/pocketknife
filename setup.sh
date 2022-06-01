@@ -1,15 +1,15 @@
 #!/bin/bash
 
-THIS_DIR=$(dirname $(realpath $0))
+cwd=$(dirname $(realpath $0))
 
 for a in $@; do
-  case $a in
+  case $opt in
     -f|--force)
     force=1
     shift
     ;;
     *)
-    echo "Unrecognised option: $a."
+    echo "Unrecognised option: $opt."
     exit 1
     ;;
   esac
@@ -19,22 +19,24 @@ sharepath=/usr/share
 
 # Setup vimrc
 mkdir -p $sharepath/vim
-if [[ $force ]] && [[ -a $sharepath/vim/vimrc ]]; then
-  rm $sharepath/vim/vimrc
+if [[ -a $sharepath/vim/vimrc ]]; then
+    if [[ $force ]]; then
+        echo "[*] Removing existing vimrc file: $sharepath/vim/vimrc"
+        rm $sharepath/vim/vimrc
+    else
+        echo "[!] Cannot add vimrc: $sharepath/vim/vimrc already exists! (Use --force to overwrite)"
+    fi
 fi
 if [[ ! -a $sharepath/vim/vimrc ]]; then
-    ln -s $THIS_DIR/vimrc $sharepath/vim/vimrc
+    echo "[*] Adding vimrc"
+    ln -s $cwd/vimrc $sharepath/vim/vimrc
 fi
 
-# Setup go.sh
-if [[ $force ]] && [[ -a $sharepath/go.sh ]]; then
-  rm $sharepath/go.sh
+source_cmd="source \"$cwd/bash/pocketknife.sh\""
+grep "^$source_cmd$" ~/.bashrc > /dev/null
+if [[ $? -ne 0 ]]; then
+    echo "[*] Adding additional bash source to ~/.bashrc"
+    echo "$source_cmd" >> ~/.bashrc
+else
+    echo "[!] Cannot add bash source to ~/.bashrc: already exists"
 fi
-if [[ ! -a $sharepath/go.sh ]]; then
-    ln -s $THIS_DIR/go.sh $sharepath/go.sh
-fi
-
-# Setup bashrc-additions
-while read line; do
-    grep "^$line$" ~/.bashrc > /dev/null || echo $line >> ~/.bashrc
-done < $THIS_DIR/bashrc-additions
